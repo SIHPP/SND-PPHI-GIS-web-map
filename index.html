@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/qgis2web.css"><link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/filter.css">
+<link rel="stylesheet" href="css/nouislider.min.css">
+        <link rel="stylesheet" href="css/leaflet-control-geocoder.Geocoder.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title></title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/leaflet-svg-shape-markers.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-control-geocoder.Geocoder.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="js/tailDT.js"></script>
+<script src="js/nouislider.min.js"></script>
+<script src="js/wNumb.js"></script>
+        <script src="data/Facilitycoordinates_2.js"></script>
+        <script src="data/SindhDistricts_3.js"></script>
+        <script>
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+            highlightLayer.openPopup();
+        }
+        var map = L.map('map', {
+            zoomControl:true, maxZoom:28, minZoom:1
+        }).fitBounds([[23.896345370817333,65.58024975897615],[28.596877429574786,72.20080789091458]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'sqmeters',
+            secondaryAreaUnit: 'hectares'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
+        .innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
+        .className += ' fas fa-ruler';
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+            map.setMaxBounds(map.getBounds());
+        }
+        map.createPane('pane_GoogleMaps_0');
+        map.getPane('pane_GoogleMaps_0').style.zIndex = 400;
+        var layer_GoogleMaps_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+            pane: 'pane_GoogleMaps_0',
+            opacity: 1.0,
+            attribution: '',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 19
+        });
+        layer_GoogleMaps_0;
+        map.addLayer(layer_GoogleMaps_0);
+        map.createPane('pane_Sindhpopulationraster_1');
+        map.getPane('pane_Sindhpopulationraster_1').style.zIndex = 401;
+        var img_Sindhpopulationraster_1 = 'data/Sindhpopulationraster_1.png';
+        var img_bounds_Sindhpopulationraster_1 = [[24.008333333,66.658333333],[28.483333333,71.125]];
+        var layer_Sindhpopulationraster_1 = new L.imageOverlay(img_Sindhpopulationraster_1,
+                                              img_bounds_Sindhpopulationraster_1,
+                                              {pane: 'pane_Sindhpopulationraster_1'});
+        bounds_group.addLayer(layer_Sindhpopulationraster_1);
+        function pop_Facilitycoordinates_2(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Facility Code</th>\
+                        <td>' + (feature.properties['Facility Code'] !== null ? autolinker.link(feature.properties['Facility Code'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">District</th>\
+                        <td>' + (feature.properties['District'] !== null ? autolinker.link(feature.properties['District'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Facility Name</th>\
+                        <td>' + (feature.properties['Facility Name'] !== null ? autolinker.link(feature.properties['Facility Name'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Facility type</th>\
+                        <td>' + (feature.properties['Facility type'] !== null ? autolinker.link(feature.properties['Facility type'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Managed By</th>\
+                        <td>' + (feature.properties['Managed By'] !== null ? autolinker.link(feature.properties['Managed By'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Area Type</th>\
+                        <td>' + (feature.properties['Area Type'] !== null ? autolinker.link(feature.properties['Area Type'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">PPHI ASV</th>\
+                        <td>' + (feature.properties['PPHI ASV'] !== null ? autolinker.link(feature.properties['PPHI ASV'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">PPHI ARV</th>\
+                        <td>' + (feature.properties['PPHI ARV'] !== null ? autolinker.link(feature.properties['PPHI ARV'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">24/7 Status</th>\
+                        <td>' + (feature.properties['24/7 Status'] !== null ? autolinker.link(feature.properties['24/7 Status'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Is the facility a part of 1000 Days Program</th>\
+                        <td>' + (feature.properties['Is the facility a part of 1000 Days Program'] !== null ? autolinker.link(feature.properties['Is the facility a part of 1000 Days Program'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Latitude</th>\
+                        <td>' + (feature.properties['Latitude'] !== null ? autolinker.link(feature.properties['Latitude'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Longitude</th>\
+                        <td>' + (feature.properties['Longitude'] !== null ? autolinker.link(feature.properties['Longitude'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_Facilitycoordinates_2_0(feature) {
+            switch(String(feature.properties['Facility type'])) {
+                case 'BHU':
+                    return {
+                pane: 'pane_Facilitycoordinates_2',
+                shape: 'triangle',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(128,17,25,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(219,30,42,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RHC':
+                    return {
+                pane: 'pane_Facilitycoordinates_2',
+                shape: 'triangle',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(50,87,128,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(72,123,182,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'THQ':
+                    return {
+                pane: 'pane_Facilitycoordinates_2',
+                shape: 'triangle',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(255,76,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,127,0,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'DHQ':
+                    return {
+                pane: 'pane_Facilitycoordinates_2',
+                shape: 'triangle',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(0,2,134,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(44,46,166,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'CD':
+                    return {
+                pane: 'pane_Facilitycoordinates_2',
+                shape: 'triangle',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(61,128,53,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(84,176,74,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'DCD':
+                    return {
+                pane: 'pane_Facilitycoordinates_2',
+                shape: 'triangle',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(61,128,53,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(84,176,74,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'ED':
+                    return {
+                pane: 'pane_Facilitycoordinates_2',
+                shape: 'triangle',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(61,128,53,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(84,176,74,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'GD':
+                    return {
+                pane: 'pane_Facilitycoordinates_2',
+                shape: 'triangle',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(61,128,53,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(84,176,74,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'GRD':
+                    return {
+                pane: 'pane_Facilitycoordinates_2',
+                shape: 'triangle',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(61,128,53,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(84,176,74,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'MCH':
+                    return {
+                pane: 'pane_Facilitycoordinates_2',
+                shape: 'triangle',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(61,128,53,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(84,176,74,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'MH':
+                    return {
+                pane: 'pane_Facilitycoordinates_2',
+                shape: 'triangle',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(61,128,53,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(84,176,74,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RD':
+                    return {
+                pane: 'pane_Facilitycoordinates_2',
+                shape: 'triangle',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(61,128,53,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(84,176,74,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'UD':
+                    return {
+                pane: 'pane_Facilitycoordinates_2',
+                shape: 'triangle',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(61,128,53,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(84,176,74,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'UHC':
+                    return {
+                pane: 'pane_Facilitycoordinates_2',
+                shape: 'triangle',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(61,128,53,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(84,176,74,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'USK':
+                    return {
+                pane: 'pane_Facilitycoordinates_2',
+                shape: 'triangle',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(61,128,53,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(84,176,74,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Others':
+                    return {
+                pane: 'pane_Facilitycoordinates_2',
+                shape: 'triangle',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(144,144,144,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Hospital':
+                    return {
+                pane: 'pane_Facilitycoordinates_2',
+                shape: 'triangle',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(255,182,93,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(253,191,111,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_Facilitycoordinates_2');
+        map.getPane('pane_Facilitycoordinates_2').style.zIndex = 402;
+        map.getPane('pane_Facilitycoordinates_2').style['mix-blend-mode'] = 'normal';
+        var layer_Facilitycoordinates_2 = new L.geoJson(json_Facilitycoordinates_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Facilitycoordinates_2',
+            layerName: 'layer_Facilitycoordinates_2',
+            pane: 'pane_Facilitycoordinates_2',
+            onEachFeature: pop_Facilitycoordinates_2,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.shapeMarker(latlng, style_Facilitycoordinates_2_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_Facilitycoordinates_2);
+        map.addLayer(layer_Facilitycoordinates_2);
+        function pop_SindhDistricts_3(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ID'] !== null ? autolinker.link(feature.properties['ID'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['District'] !== null ? autolinker.link(feature.properties['District'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Dist_short'] !== null ? autolinker.link(feature.properties['Dist_short'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_SindhDistricts_3_0() {
+            return {
+                pane: 'pane_SindhDistricts_3',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(141,90,153,0.0)',
+                interactive: false,
+            }
+        }
+        map.createPane('pane_SindhDistricts_3');
+        map.getPane('pane_SindhDistricts_3').style.zIndex = 403;
+        map.getPane('pane_SindhDistricts_3').style['mix-blend-mode'] = 'normal';
+        var layer_SindhDistricts_3 = new L.geoJson(json_SindhDistricts_3, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_SindhDistricts_3',
+            layerName: 'layer_SindhDistricts_3',
+            pane: 'pane_SindhDistricts_3',
+            onEachFeature: pop_SindhDistricts_3,
+            style: style_SindhDistricts_3_0,
+        });
+        bounds_group.addLayer(layer_SindhDistricts_3);
+        map.addLayer(layer_SindhDistricts_3);
+        var osmGeocoder = new L.Control.Geocoder({
+            collapsed: true,
+            position: 'topleft',
+            text: 'Search',
+            title: 'Testing'
+        }).addTo(map);
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .className += ' fa fa-search';
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .title += 'Search for a place';
+        var baseMaps = {};
+        L.control.layers(baseMaps,{'<img src="legend/SindhDistricts_3.png" /> Sindh Districts': layer_SindhDistricts_3,'Facility coordinates<br /><table><tr><td style="text-align: center;"><img src="legend/Facilitycoordinates_2_BHU0.png" /></td><td>BHU</td></tr><tr><td style="text-align: center;"><img src="legend/Facilitycoordinates_2_RHC1.png" /></td><td>RHC</td></tr><tr><td style="text-align: center;"><img src="legend/Facilitycoordinates_2_THQ2.png" /></td><td>THQ</td></tr><tr><td style="text-align: center;"><img src="legend/Facilitycoordinates_2_DHQ3.png" /></td><td>DHQ</td></tr><tr><td style="text-align: center;"><img src="legend/Facilitycoordinates_2_CD4.png" /></td><td>CD</td></tr><tr><td style="text-align: center;"><img src="legend/Facilitycoordinates_2_DCD5.png" /></td><td>DCD</td></tr><tr><td style="text-align: center;"><img src="legend/Facilitycoordinates_2_ED6.png" /></td><td>ED</td></tr><tr><td style="text-align: center;"><img src="legend/Facilitycoordinates_2_GD7.png" /></td><td>GD</td></tr><tr><td style="text-align: center;"><img src="legend/Facilitycoordinates_2_GRD8.png" /></td><td>GRD</td></tr><tr><td style="text-align: center;"><img src="legend/Facilitycoordinates_2_MCH9.png" /></td><td>MCH</td></tr><tr><td style="text-align: center;"><img src="legend/Facilitycoordinates_2_MH10.png" /></td><td>MH</td></tr><tr><td style="text-align: center;"><img src="legend/Facilitycoordinates_2_RD11.png" /></td><td>RD</td></tr><tr><td style="text-align: center;"><img src="legend/Facilitycoordinates_2_UD12.png" /></td><td>UD</td></tr><tr><td style="text-align: center;"><img src="legend/Facilitycoordinates_2_UHC13.png" /></td><td>UHC</td></tr><tr><td style="text-align: center;"><img src="legend/Facilitycoordinates_2_USK14.png" /></td><td>USK</td></tr><tr><td style="text-align: center;"><img src="legend/Facilitycoordinates_2_Others15.png" /></td><td>Others</td></tr><tr><td style="text-align: center;"><img src="legend/Facilitycoordinates_2_Hospital16.png" /></td><td>Hospital</td></tr></table>': layer_Facilitycoordinates_2,"Sindh population raster": layer_Sindhpopulationraster_1,"Google Maps": layer_GoogleMaps_0,}).addTo(map);
+        setBounds();
+        var i = 0;
+        layer_SindhDistricts_3.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['District'] !== null?String('<div style="color: #323232; font-size: 10pt; font-family: \'Arial\', sans-serif;">' + layer.feature.properties['District']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_SindhDistricts_3'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var mapDiv = document.getElementById('map');
+        var row = document.createElement('div');
+        row.className="row";
+        row.id="all";
+        row.style.height = "100%";
+        var col1 = document.createElement('div');
+        col1.className="col9";
+        col1.id = "mapWindow";
+        col1.style.height = "99%";
+        col1.style.width = "80%";
+        col1.style.display = "inline-block";
+        var col2 = document.createElement('div');
+        col2.className="col3";
+        col2.id = "menu";
+        col2.style.display = "inline-block";
+        mapDiv.parentNode.insertBefore(row, mapDiv);
+        document.getElementById("all").appendChild(col1);
+        document.getElementById("all").appendChild(col2);
+        col1.appendChild(mapDiv)
+        var Filters = {"Managed By": "str","Facility type": "str"};
+        function filterFunc() {
+          map.eachLayer(function(lyr){
+          if ("options" in lyr && "dataVar" in lyr["options"]){
+            features = this[lyr["options"]["dataVar"]].features.slice(0);
+            try{
+              for (key in Filters){
+                keyS = key.replace(/[^a-zA-Z0-9_]/g, "")
+                if (Filters[key] == "str" || Filters[key] == "bool"){
+                  var selection = [];
+                  var options = document.getElementById("sel_" + keyS).options
+                  for (var i=0; i < options.length; i++) {
+                    if (options[i].selected) selection.push(options[i].value);
+                  }
+                    try{
+                      if (key in features[0].properties){
+                        for (i = features.length - 1;
+                          i >= 0; --i){
+                          if (selection.indexOf(
+                          features[i].properties[key])<0
+                          && selection.length>0) {
+                          features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                  }
+                }
+                if (Filters[key] == "int"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (parseInt(features[i].properties[key])
+                          < sliderVals[0]
+                          || parseInt(features[i].properties[key])
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "real"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (features[i].properties[key]
+                          < sliderVals[0]
+                          || features[i].properties[key]
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "date"
+                  || Filters[key] == "datetime"
+                  || Filters[key] == "time"){
+                  try{
+                    if (key in features[0].properties){
+                      HTMLkey = key.replace(/[&\/\\#,+()$~%.'":*?<>{} ]/g, '');
+                      startdate = document.getElementById("dat_" +
+                        HTMLkey + "_date1").value.replace(" ", "T");
+                      enddate = document.getElementById("dat_" +
+                        HTMLkey + "_date2").value.replace(" ", "T");
+                      for (i = features.length - 1; i >= 0; --i){
+                        if (features[i].properties[key] < startdate
+                          || features[i].properties[key] > enddate){
+                          features.splice(i,1);
+                        }
+                      }
+                    }
+                  } catch(err){
+                  }
+                }
+              }
+            } catch(err){
+            }
+          this[lyr["options"]["layerName"]].clearLayers();
+          this[lyr["options"]["layerName"]].addData(features);
+        var i = 0;
+        layer_SindhDistricts_3.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['District'] !== null?String('<div style="color: #323232; font-size: 10pt; font-family: \'Arial\', sans-serif;">' + layer.feature.properties['District']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_SindhDistricts_3'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+          }
+          })
+        }
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_ManagedBy = document.createElement('div');
+            div_ManagedBy.id = "div_ManagedBy";
+            div_ManagedBy.className= "filterselect";
+            document.getElementById("menu").appendChild(div_ManagedBy);
+            sel_ManagedBy = document.createElement('select');
+            sel_ManagedBy.multiple = true;
+            sel_ManagedBy.size = 4;
+            sel_ManagedBy.id = "sel_ManagedBy";
+            var ManagedBy_options_str = "<option value='' unselected></option>";
+            sel_ManagedBy.onchange = function(){filterFunc()};
+            ManagedBy_options_str  += '<option value="DOH">DOH</option>';
+            ManagedBy_options_str  += '<option value="MERF">MERF</option>';
+            ManagedBy_options_str  += '<option value="Other">Other</option>';
+            ManagedBy_options_str  += '<option value="PPHI">PPHI</option>';
+            sel_ManagedBy.innerHTML = ManagedBy_options_str;
+            div_ManagedBy.appendChild(sel_ManagedBy);
+            var lab_ManagedBy = document.createElement('div');
+            lab_ManagedBy.innerHTML = 'Managed By';
+            lab_ManagedBy.className = 'filterlabel';
+            div_ManagedBy.appendChild(lab_ManagedBy);
+            var reset_ManagedBy = document.createElement('div');
+            reset_ManagedBy.innerHTML = 'clear filter';
+            reset_ManagedBy.className = 'filterlabel';
+            reset_ManagedBy.onclick = function() {
+                var options = document.getElementById("sel_ManagedBy").options;
+                for (var i=0; i < options.length; i++) {
+                    options[i].selected = false;
+                }
+                filterFunc();
+            };
+            div_ManagedBy.appendChild(reset_ManagedBy);
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_Facilitytype = document.createElement('div');
+            div_Facilitytype.id = "div_Facilitytype";
+            div_Facilitytype.className= "filterselect";
+            document.getElementById("menu").appendChild(div_Facilitytype);
+            sel_Facilitytype = document.createElement('select');
+            sel_Facilitytype.multiple = true;
+            sel_Facilitytype.size = 10;
+            sel_Facilitytype.id = "sel_Facilitytype";
+            var Facilitytype_options_str = "<option value='' unselected></option>";
+            sel_Facilitytype.onchange = function(){filterFunc()};
+            Facilitytype_options_str  += '<option value="BHU">BHU</option>';
+            Facilitytype_options_str  += '<option value="CD">CD</option>';
+            Facilitytype_options_str  += '<option value="DCD">DCD</option>';
+            Facilitytype_options_str  += '<option value="DHQ">DHQ</option>';
+            Facilitytype_options_str  += '<option value="ED">ED</option>';
+            Facilitytype_options_str  += '<option value="GD">GD</option>';
+            Facilitytype_options_str  += '<option value="GRD">GRD</option>';
+            Facilitytype_options_str  += '<option value="Hospital">Hospital</option>';
+            Facilitytype_options_str  += '<option value="MCH">MCH</option>';
+            Facilitytype_options_str  += '<option value="MH">MH</option>';
+            Facilitytype_options_str  += '<option value="Others">Others</option>';
+            Facilitytype_options_str  += '<option value="RD">RD</option>';
+            Facilitytype_options_str  += '<option value="RHC">RHC</option>';
+            Facilitytype_options_str  += '<option value="THQ">THQ</option>';
+            Facilitytype_options_str  += '<option value="UD">UD</option>';
+            Facilitytype_options_str  += '<option value="UHC">UHC</option>';
+            Facilitytype_options_str  += '<option value="USK">USK</option>';
+            sel_Facilitytype.innerHTML = Facilitytype_options_str;
+            div_Facilitytype.appendChild(sel_Facilitytype);
+            var lab_Facilitytype = document.createElement('div');
+            lab_Facilitytype.innerHTML = 'Facility type';
+            lab_Facilitytype.className = 'filterlabel';
+            div_Facilitytype.appendChild(lab_Facilitytype);
+            var reset_Facilitytype = document.createElement('div');
+            reset_Facilitytype.innerHTML = 'clear filter';
+            reset_Facilitytype.className = 'filterlabel';
+            reset_Facilitytype.onclick = function() {
+                var options = document.getElementById("sel_Facilitytype").options;
+                for (var i=0; i < options.length; i++) {
+                    options[i].selected = false;
+                }
+                filterFunc();
+            };
+            div_Facilitytype.appendChild(reset_Facilitytype);
+        L.ImageOverlay.include({
+            getBounds: function () {
+                return this._bounds;
+            }
+        });
+        resetLabels([layer_Facilitycoordinates_2,layer_SindhDistricts_3]);
+        map.on("zoomend", function(){
+            resetLabels([layer_Facilitycoordinates_2,layer_SindhDistricts_3]);
+        });
+        map.on("layeradd", function(){
+            resetLabels([layer_Facilitycoordinates_2,layer_SindhDistricts_3]);
+        });
+        map.on("layerremove", function(){
+            resetLabels([layer_Facilitycoordinates_2,layer_SindhDistricts_3]);
+        });
+        </script>
+    </body>
+</html>
